@@ -15,8 +15,9 @@ from datetime import date
 from notion_client import Client
 from notion_client.errors import APIResponseError
 
-SOURCE_PAGE_ID = "97e9b3e2-2758-47f7-b8dc-8d30822ed52e"  # "Meeting notes/"
-DATABASE_ID    = "48a8bd90-634d-4cf7-bb78-9f86b5380c91"  # "To-Dos from Meeting Notes"
+SOURCE_PAGE_ID  = "97e9b3e2-2758-47f7-b8dc-8d30822ed52e"  # "Meeting notes/"
+DATABASE_ID     = "48a8bd90-634d-4cf7-bb78-9f86b5380c91"  # "To-Dos from Meeting Notes"
+DATA_SOURCE_ID  = "e0db7104-a5d1-468d-a9e2-7b65c3e0ac3f"  # "To-Dos from Meeting Notes" data source
 
 MARKER = "**"
 DEFAULT_STATUS = "Not Started"
@@ -107,10 +108,10 @@ def fetch_existing_tasks():
     existing = set()
     cursor = None
     while True:
-        kwargs = {"database_id": DATABASE_ID, "page_size": 100}
+        kwargs = {"data_source_id": DATA_SOURCE_ID, "page_size": 100}
         if cursor:
             kwargs["start_cursor"] = cursor
-        resp = notion.databases.query(**kwargs)
+        resp = notion.data_sources.query(**kwargs)
         for page in resp["results"]:
             title_items = page["properties"].get("Task", {}).get("title", [])
             title = "".join(t.get("plain_text", "") for t in title_items).strip()
@@ -131,8 +132,7 @@ def create_todo(todo):
     }
     if todo["meeting_date"]:
         props["Meeting Date"] = {"date": {"start": todo["meeting_date"]}}
-    notion.pages.create(parent={"database_id": DATABASE_ID}, properties=props)
-
+    notion.pages.create(parent={"data_source_id": DATA_SOURCE_ID}, properties=props)
 
 def main():
     print("Scanning meeting notes...")
