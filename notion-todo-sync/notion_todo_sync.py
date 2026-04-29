@@ -50,8 +50,16 @@ def walk_blocks(block_id):
 def plain_text(block):
     btype = block.get("type", "")
     data = block.get(btype, {})
+    if not isinstance(data, dict):
+        return ""
     rt = data.get("rich_text") or data.get("title") or []
-    return "".join(t.get("plain_text", "") for t in rt)
+    if not isinstance(rt, list):
+        return ""
+    parts = []
+    for t in rt:
+        if isinstance(t, dict):
+            parts.append(t.get("plain_text", ""))
+    return "".join(parts)
 
 
 DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
